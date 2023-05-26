@@ -1,0 +1,79 @@
+version: '3.8'
+
+# networks
+# create a network 'data_network' in mode 'bridged'
+networks:
+  data_network:
+    driver: bridge
+
+# services:
+# create a service 'guacd' from image 'guacamole/guacd'
+services:
+  guacd:
+    container_name: guacd
+    image: guacamole/guacd
+    networks:
+      data_network:
+    ports:
+      - 4822:4822
+    restart: always
+    volumes:
+    - ./drive:/drive:rw
+    - ./record:/record:rw
+
+# database postgres
+# create a service 'postgres' from image 'postgres:15.2-alpine'
+
+  postgres:
+    container_name: postgres
+    image: postgres:3.18-alpine
+    networks:
+      data_network:
+    restart: always
+    environment:
+      - POSTGRES_USER=guacamole_user
+      - POSTGRES_PASSWORD=admin0088
+      - POSTGRES_DB=datawork_db
+    volumes:
+     - ./init:/docker-entrypoint-initdb.d:z
+     - ./data:/var/lib/postgresql/data:Z
+
+  guacomole:
+    container_name: guacamole
+    image: guacamole/guacamole
+    networks:
+      data_network:
+    restart: always
+    ports:
+      - 8080/tcp
+    links:
+      - guacd
+    environment:
+      - GUACD_HOSTNAME=guacd
+      - POSTGRES_DATABASE=datawork_db
+      - POSTGRES_HOSTNAME=postgres
+      - POSTGRES_USER=guacamole_user
+      - POSTGRES_PASSWORD=admin0088
+    depends_on:
+      - guacd
+      - postgres
+## enable next line if not using nginx
+##    - 8080:8080/tcp # Guacamole is on :8080/guacamole, not /.
+## enable next line when using nginx
+
+########### optional ##############
+  # nginx
+  nginx:
+   container_name: nginx_guacamole
+   restart: always
+   image: nginx
+   volumes:
+   - ./nginx/templates:/etc/nginx/templates:ro
+   - ./nginx/ssl/self.cert:/etc/nginx/ssl/self.cert:ro
+   - ./nginx/ssl/self-ssl.key:/etc/nginx/ssl/self-ssl.key:ro
+   ports:
+   - 8443:443
+   links:
+   - guacamole
+   networks:
+     data_network:
