@@ -26,7 +26,7 @@ services:
 
   postgres:
     container_name: postgres
-    image: postgres:3.18-alpine
+    image: postgres
     networks:
       data_network:
     restart: always
@@ -38,7 +38,7 @@ services:
      - ./init:/docker-entrypoint-initdb.d:z
      - ./data:/var/lib/postgresql/data:Z
 
-  guacomole:
+  guacamole:
     container_name: guacamole
     image: guacamole/guacamole
     networks:
