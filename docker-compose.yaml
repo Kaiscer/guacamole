@@ -83,4 +83,23 @@ services:
    networks:
      data_network:
 
+  debianVNC:
+    container_name: debianVNC
+    image: alexaib/debian-vnc
+    networks:
+      data_network:
+    environment:
+      - VNC_RESOLUTION=1280x1024
+      - VNC_COL_DEPTH=24
+      - VNC_PW=dataworks
+      - USER=root
+    command: ["/bin/bash", "-c", "/usr/bin/vncserver && tail -f /dev/null"]
+    ports:
+      - 5901:5901
+    restart: always
+    volumes:
+      - ./drive:/drive:rw
+      - ./record:/record:rw
+
+
   
