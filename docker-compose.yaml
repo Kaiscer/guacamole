@@ -85,7 +85,7 @@ services:
 
   debianVNC:
     container_name: debianVNC
-    image: alexaib/debian-vnc
+    image: dataworks-testing
     networks:
       data_network:
     environment:
